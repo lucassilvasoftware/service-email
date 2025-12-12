@@ -1941,27 +1941,76 @@ MESSAGES_MAPPING = {'convite_por_email': CONVITE_POR_EMAIL,
                     'change_phone': CHANGE_PHONE}
 
 
-class MessageHandler():
-    """Small wrapper for the custom e-mails that are gonna
-    be sent to the user"""
+"""
+Handler para processamento de templates de e-mail HTML.
+"""
+import logging
+from typing import Optional
 
-    def alter_string_information(self, type_msg: str, args: list) -> str:
-        """Check the type of message and override the infomation needed
-        for the custom e-mail
+logger = logging.getLogger(__name__)
 
-        We do have a mapping of the default messages that are indexed by
-        the number(which is equivalent to the type_msg)
+
+class MessageHandler:
+    """
+    Handler para processamento e substituição de variáveis em templates HTML.
+    """
+    
+    def alter_string_information(self, type_msg: str, args: list[str]) -> Optional[str]:
+        """
+        Substitui placeholders 'None' no template pelos argumentos fornecidos.
+        
+        Args:
+            type_msg: Tipo de mensagem/template a ser usado
+            args: Lista de argumentos para substituição no template
+            
+        Returns:
+            str: Template HTML com variáveis substituídas, ou None se houver erro
+            
+        Note:
+            O template deve conter placeholders 'None' que serão substituídos
+            sequencialmente pelos argumentos fornecidos.
         """
         try:
-            message_text = MESSAGES_MAPPING[type_msg]
+            # Busca template no mapeamento
+            message_text = MESSAGES_MAPPING.get(type_msg)
+            
+            if not message_text:
+                logger.warning(f"Template não encontrado: {type_msg}")
+                return None
+            
+            # Valida se há argumentos suficientes
+            placeholder_count = message_text.count('None')
+            if len(args) < placeholder_count:
+                logger.warning(
+                    f"Argumentos insuficientes para template {type_msg}. "
+                    f"Esperado: {placeholder_count}, Recebido: {len(args)}"
+                )
+            
+            # Substitui placeholders pelos argumentos
+            result = message_text
+            for arg in args:
+                if 'None' in result:
+                    result = result.replace('None', str(arg), 1)
+                else:
+                    logger.warning(
+                        f"Mais argumentos fornecidos do que placeholders no template {type_msg}"
+                    )
+                    break
+            
+            return result
+            
         except KeyError:
+            logger.error(f"Chave de template inválida: {type_msg}")
             return None
-        except ValueError:
+        except Exception as e:
+            logger.error(f"Erro ao processar template {type_msg}: {e}", exc_info=True)
             return None
-
-        try:
-            for string in args:
-                message_text = message_text.replace('None', string, 1)
-            return message_text
-        except Exception:
-            return None
+    
+    def get_available_templates(self) -> list[str]:
+        """
+        Retorna lista de templates disponíveis.
+        
+        Returns:
+            list[str]: Lista de tipos de template disponíveis
+        """
+        return list(MESSAGES_MAPPING.keys())

@@ -1,328 +1,448 @@
 {
 	"info": {
-		"_postman_id": "2d67fc6c-1e73-42e4-a011-41e4014681d7",
-		"name": "Email",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "14303882"
+		"_postman_id": "email-service-wiplay",
+		"name": "SERVICE Email - ME",
+		"description": "Collection para o serviço de envio de e-mails Wiplay",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Verificação Email",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "accept",
-						"value": "application/json"
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health - Status da Aplicação",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/health",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Endpoint de health check básico da aplicação. Não requer autenticação."
 					},
-					{
-						"key": "Authorization",
-						"value": "Bearer Bearer {{AUTH_TOKEN}}"
+					"response": []
+				},
+				{
+					"name": "Health - Status Kafka",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/health/kafka",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"health",
+								"kafka"
+							]
+						},
+						"description": "Endpoint para verificar status detalhado da conexão com Kafka. Não requer autenticação."
 					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"Código Integração ConteúdoDS\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://10.1.2.155:8500/email/wiplay/verificacao_email?type_msg=verificacao_email",
-					"protocol": "http",
-					"host": [
-						"10",
-						"1",
-						"2",
-						"155"
-					],
-					"port": "8500",
-					"path": [
-						"email",
-						"wiplay",
-						"verificacao_email"
-					],
-					"query": [
-						{
-							"key": "type_msg",
-							"value": "verificacao_email"
-						}
-					]
-				},
-				"description": "Generated from cURL: curl -X 'POST' \\\r\n  'http://10.1.2.155:8500/email/wiplay/verificacao_email?type_msg=verificacao_email' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Authorization: Bearer Bearer {{AUTH_TOKEN}}' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"string\"\r\n}'"
-			},
-			"response": []
+					"response": []
+				}
+			]
 		},
 		{
-			"name": "Convite Email",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "accept",
-						"value": "application/json"
+			"name": "E-mails Wiplay",
+			"item": [
+				{
+					"name": "Convite",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "destinatary",
+									"value": "cliente@exemplo.com",
+									"type": "text"
+								},
+								{
+									"key": "subject",
+									"value": "Bem-vindo à Wiplay",
+									"type": "text"
+								},
+								{
+									"key": "args",
+									"value": "João Silva, ABC123",
+									"type": "text",
+									"description": "Argumentos separados por vírgula: Nome_cliente, código_de_ativação"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/email/wiplay/convite?type_msg=convite_por_email",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"email",
+								"wiplay",
+								"convite"
+							],
+							"query": [
+								{
+									"key": "type_msg",
+									"value": "convite_por_email",
+									"description": "Tipo de template (opcional, padrão: convite_por_email)"
+								}
+							]
+						},
+						"description": "Envia e-mail de convite/boas-vindas para o cliente.\n\nArgs: Nome_cliente, código_de_ativação"
 					},
-					{
-						"key": "Authorization",
-						"value": "Bearer Bearer {{AUTH_TOKEN}}"
+					"response": []
+				},
+				{
+					"name": "Change Phone",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "destinatary",
+									"value": "cliente@exemplo.com",
+									"type": "text"
+								},
+								{
+									"key": "subject",
+									"value": "Confirmação de Troca de Telefone",
+									"type": "text"
+								},
+								{
+									"key": "args",
+									"value": "João Silva, XYZ789",
+									"type": "text",
+									"description": "Argumentos separados por vírgula: Nome_cliente, código_de_ativação"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/email/wiplay/change_phone?type_msg=change_phone",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"email",
+								"wiplay",
+								"change_phone"
+							],
+							"query": [
+								{
+									"key": "type_msg",
+									"value": "change_phone",
+									"description": "Tipo de template (opcional, padrão: change_phone)"
+								}
+							]
+						},
+						"description": "Envia e-mail de confirmação de troca de telefone.\n\nArgs: Nome_cliente, código_de_ativação"
 					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"Convite por email\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
+					"response": []
 				},
-				"url": {
-					"raw": "http://10.1.2.155:8500/email/wiplay/convite?type_msg=convite_por_email",
-					"protocol": "http",
-					"host": [
-						"10",
-						"1",
-						"2",
-						"155"
-					],
-					"port": "8500",
-					"path": [
-						"email",
-						"wiplay",
-						"convite"
-					],
-					"query": [
-						{
-							"key": "type_msg",
-							"value": "convite_por_email"
-						}
-					]
+				{
+					"name": "Erro Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "destinatary",
+									"value": "cliente@exemplo.com",
+									"type": "text"
+								},
+								{
+									"key": "subject",
+									"value": "Tentativa de Login Falhou",
+									"type": "text"
+								},
+								{
+									"key": "args",
+									"value": "João Silva",
+									"type": "text",
+									"description": "Argumentos separados por vírgula: nome_cliente"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/email/wiplay/erro_login?type_msg=erro_ao_fazer_login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"email",
+								"wiplay",
+								"erro_login"
+							],
+							"query": [
+								{
+									"key": "type_msg",
+									"value": "erro_ao_fazer_login",
+									"description": "Tipo de template (opcional, padrão: erro_ao_fazer_login)"
+								}
+							]
+						},
+						"description": "Envia e-mail de erro de login para o cliente.\n\nArgs: nome_cliente"
+					},
+					"response": []
 				},
-				"description": "Generated from cURL: curl -X 'POST' \\\r\n  'http://10.1.2.155:8500/email/wiplay/convite?type_msg=convite_por_email' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Authorization: Bearer Bearer {{AUTH_TOKEN}}' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"Código Integração ConteúdoDS\"\r\n}'"
-			},
-			"response": []
+				{
+					"name": "Recuperar Senha",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "destinatary",
+									"value": "cliente@exemplo.com",
+									"type": "text"
+								},
+								{
+									"key": "subject",
+									"value": "Recuperação de Senha",
+									"type": "text"
+								},
+								{
+									"key": "args",
+									"value": "João Silva",
+									"type": "text",
+									"description": "Argumentos separados por vírgula: nome_cliente"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/email/wiplay/recuperar_senha?type_msg=recuperacao_de_senha",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"email",
+								"wiplay",
+								"recuperar_senha"
+							],
+							"query": [
+								{
+									"key": "type_msg",
+									"value": "recuperacao_de_senha",
+									"description": "Tipo de template (opcional, padrão: recuperacao_de_senha)"
+								}
+							]
+						},
+						"description": "Envia e-mail de recuperação de senha.\n\nArgs: nome_cliente"
+					},
+					"response": []
+				},
+				{
+					"name": "Login Bloqueado",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "destinatary",
+									"value": "cliente@exemplo.com",
+									"type": "text"
+								},
+								{
+									"key": "subject",
+									"value": "Login Bloqueado",
+									"type": "text"
+								},
+								{
+									"key": "args",
+									"value": "João Silva",
+									"type": "text",
+									"description": "Argumentos separados por vírgula: nome_cliente"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/email/wiplay/login_bloqueado?type_msg=login_bloqueado",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"email",
+								"wiplay",
+								"login_bloqueado"
+							],
+							"query": [
+								{
+									"key": "type_msg",
+									"value": "login_bloqueado",
+									"description": "Tipo de template (opcional, padrão: login_bloqueado)"
+								}
+							]
+						},
+						"description": "Envia e-mail de login bloqueado.\n\nArgs: nome_cliente"
+					},
+					"response": []
+				},
+				{
+					"name": "Navegador Desconhecido",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "destinatary",
+									"value": "cliente@exemplo.com",
+									"type": "text"
+								},
+								{
+									"key": "subject",
+									"value": "Acesso de Navegador Desconhecido",
+									"type": "text"
+								},
+								{
+									"key": "args",
+									"value": "Chrome, 120.0, Windows 10, 192.168.1.100",
+									"type": "text",
+									"description": "Argumentos separados por vírgula: navegador, versão_do_navegador, sistema_operacional, endereço_IP"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/email/wiplay/navegador_desconhecido?type_msg=navegador_desconhecido",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"email",
+								"wiplay",
+								"navegador_desconhecido"
+							],
+							"query": [
+								{
+									"key": "type_msg",
+									"value": "navegador_desconhecido",
+									"description": "Tipo de template (opcional, padrão: navegador_desconhecido)"
+								}
+							]
+						},
+						"description": "Envia e-mail de navegador desconhecido.\n\nArgs: navegador, versão_do_navegador, sistema_operacional, endereço_IP"
+					},
+					"response": []
+				},
+				{
+					"name": "Verificação Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "destinatary",
+									"value": "cliente@exemplo.com",
+									"type": "text"
+								},
+								{
+									"key": "subject",
+									"value": "Verificação de E-mail",
+									"type": "text"
+								},
+								{
+									"key": "args",
+									"value": "João Silva, DEF456",
+									"type": "text",
+									"description": "Argumentos separados por vírgula: nome_cliente, código_validação"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/email/wiplay/verificacao_email?type_msg=verificacao_email",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"email",
+								"wiplay",
+								"verificacao_email"
+							],
+							"query": [
+								{
+									"key": "type_msg",
+									"value": "verificacao_email",
+									"description": "Tipo de template (opcional, padrão: verificacao_email)"
+								}
+							]
+						},
+						"description": "Envia e-mail de verificação de e-mail.\n\nArgs: nome_cliente, código_validação"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:8500",
+			"type": "string"
 		},
 		{
-			"name": "Erro login",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "accept",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer Bearer {{AUTH_TOKEN}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"Erro no login\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://10.1.2.155:8500/email/wiplay/erro_login?type_msg=erro_ao_fazer_login",
-					"protocol": "http",
-					"host": [
-						"10",
-						"1",
-						"2",
-						"155"
-					],
-					"port": "8500",
-					"path": [
-						"email",
-						"wiplay",
-						"erro_login"
-					],
-					"query": [
-						{
-							"key": "type_msg",
-							"value": "erro_ao_fazer_login"
-						}
-					]
-				},
-				"description": "Generated from cURL: curl -X 'POST' \\\r\n  'http://10.1.2.155:8500/email/wiplay/erro_login?type_msg=erro_ao_fazer_login' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Authorization: Bearer Bearer {{AUTH_TOKEN}}' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"Erro no login\"\r\n}'"
-			},
-			"response": []
-		},
-		{
-			"name": "Recuperar senha",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "accept",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer Bearer {{AUTH_TOKEN}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"Recuperar senha\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://10.1.2.155:8500/email/wiplay/recuperar_senha?type_msg=recuperacao_de_senha",
-					"protocol": "http",
-					"host": [
-						"10",
-						"1",
-						"2",
-						"155"
-					],
-					"port": "8500",
-					"path": [
-						"email",
-						"wiplay",
-						"recuperar_senha"
-					],
-					"query": [
-						{
-							"key": "type_msg",
-							"value": "recuperacao_de_senha"
-						}
-					]
-				},
-				"description": "Generated from cURL: curl -X 'POST' \\\r\n  'http://10.1.2.155:8500/email/wiplay/recuperar_senha?type_msg=recuperacao_de_senha' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Authorization: Bearer Bearer {{AUTH_TOKEN}}' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"Recuperar senha\"\r\n}'"
-			},
-			"response": []
-		},
-		{
-			"name": "Login bloqueado",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "accept",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer Bearer {{AUTH_TOKEN}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"Login Bloqueado\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://10.1.2.155:8500/email/wiplay/login_bloqueado?type_msg=login_bloqueado",
-					"protocol": "http",
-					"host": [
-						"10",
-						"1",
-						"2",
-						"155"
-					],
-					"port": "8500",
-					"path": [
-						"email",
-						"wiplay",
-						"login_bloqueado"
-					],
-					"query": [
-						{
-							"key": "type_msg",
-							"value": "login_bloqueado"
-						}
-					]
-				},
-				"description": "Generated from cURL: curl -X 'POST' \\\r\n  'http://10.1.2.155:8500/email/wiplay/login_bloqueado?type_msg=login_bloqueado' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Authorization: Bearer Bearer {{AUTH_TOKEN}}' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"Login Bloqueado\"\r\n}'"
-			},
-			"response": []
-		},
-		{
-			"name": "Navegador Desconhecido",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "accept",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer Bearer {{AUTH_TOKEN}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"navegador_desconhecidoa\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://10.1.2.155:8500/email/wiplay/navegador_desconhecido?type_msg=navegador_desconhecido",
-					"protocol": "http",
-					"host": [
-						"10",
-						"1",
-						"2",
-						"155"
-					],
-					"port": "8500",
-					"path": [
-						"email",
-						"wiplay",
-						"navegador_desconhecido"
-					],
-					"query": [
-						{
-							"key": "type_msg",
-							"value": "navegador_desconhecido"
-						}
-					]
-				},
-				"description": "Generated from cURL: curl -X 'POST' \\\r\n  'http://10.1.2.155:8500/email/wiplay/navegador_desconhecido?type_msg=navegador_desconhecido' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Authorization: Bearer Bearer {{AUTH_TOKEN}}' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"args\": \"Lucas, 123123\",\r\n  \"destinatary\": \"lucasreboucas100@gmail.com\",\r\n  \"subject\": \"navegador_desconhecidoa\"\r\n}'"
-			},
-			"response": []
+			"key": "AUTH_TOKEN",
+			"value": "{{AUTH_TOKEN}}",
+			"type": "string"
 		}
 	]
 }
+

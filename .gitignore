@@ -104,6 +104,8 @@ celerybeat.pid
 
 # Environments
 .env
+.env.local
+.env.*.local
 .venv
 env/
 venv/
@@ -111,6 +113,11 @@ ENV/
 env.bak/
 venv.bak/
 pyvenv.cfg
+
+# Virtual environment directories (não devem estar no repositório)
+Scripts/
+Lib/
+Include/
 
 # Spyder project settings
 .spyderproject

@@ -2,15 +2,6 @@
 
 Serviço FastAPI para envio de e-mails através de templates HTML e fila Kafka.
 
-## Sobre o arquivo __init__.py
-
-O arquivo `__init__.py` está vazio e não executa nenhuma ação automaticamente quando o terminal é aberto. Sua função é marcar o diretório como um pacote Python, permitindo que outros módulos importem código deste diretório.
-
-Se alguma ação ocorre automaticamente ao abrir o terminal, pode ser devido a:
-- Ativação automática do ambiente virtual (se configurado no shell)
-- Scripts de inicialização do sistema operacional
-- Configurações do terminal ou IDE
-
 ---
 
 ## Execução Local (Desenvolvimento)
@@ -19,7 +10,6 @@ Se alguma ação ocorre automaticamente ao abrir o terminal, pode ser devido a:
 
 - Python 3.12 ou superior
 - Ambiente virtual Python (venv)
-- Credenciais configuradas em `env/credentials.cfg`
 
 ### 1. Configurar Ambiente Virtual
 
@@ -47,17 +37,25 @@ pip install -r requirements.txt
 
 ### 3. Configurar Credenciais
 
-Crie o arquivo `env/credentials.cfg` com as seguintes variáveis:
+Crie o arquivo `config.cfg` na raiz do projeto:
 
-```cfg
+```ini
+[DEFAULT]
 AUTH_TOKEN=seu_token_aqui
 EMAIL_WIPLAY_TOPICO=nome_do_topico_kafka
+SERVER_IP=10.1.2.224:9092
+PORT=8500
+LOG_LEVEL=info
 ```
+
+> A aplicação também suporta arquivo `.env` ou variáveis de ambiente. Prioridade: Variáveis de ambiente > .env > config.cfg
 
 ### 4. Executar a Aplicação
 
 ```bash
-python main.py
+python -m app.main
+# ou
+python app/main.py
 ```
 
 A aplicação estará disponível em: `http://localhost:8500`
@@ -95,30 +93,80 @@ docker login -u dev@wiplay.com.br
 
 ---
 
-### 3. Build da Imagem Docker
+### 3. Dockerfile recomendado
 
-```bash
-docker build -t dockerwip624/emails:v1.41 .
+O `Dockerfile` do projeto:
+
+```dockerfile
+# Imagem base Python
+FROM python:3.12-slim
+
+# Atualiza pacotes do sistema
+RUN apt-get update && apt-get upgrade -y
+
+# Instala dependências Python
+RUN pip install --upgrade pip
+
+# Define diretório de trabalho
+WORKDIR /app
+
+# Copia o código da aplicação
+COPY . /app
+
+# Instala dependências do projeto
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expõe a porta da aplicação
+EXPOSE 8500
+
+# Comando para iniciar a aplicação
+CMD ["gunicorn", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--bind", "0.0.0.0:8500", "--timeout", "300"]
 ```
 
-- `-t` define a tag da imagem (`v1.41`)
-- `.` indica o diretório atual como contexto do build
+> Ajuste `app.main:app` para o caminho do arquivo principal da sua aplicação.
 
 ---
 
-### 4. Executando o Container
+### 4. Build da imagem Docker
 
 ```bash
-docker run -d -p 8500:8500 --name emails dockerwip624/emails:v1.41
+docker build -t dockerwip624/emails:v2.0 .
 ```
 
-- `-d`: executa em background
-- `-p 8500:8500`: mapeia a porta 8500 do host para a porta 8500 do container
-- `--name emails`: nome do container
+- `-t` define a tag da imagem (`v2.0`).
+- `.` indica o diretório atual como contexto do build.
 
 ---
 
-### 5. Verificando Containers Ativos
+### 5. Executando o container
+
+**Opção A: Usando arquivo config.cfg (incluído na imagem)**
+
+```bash
+docker run -d -p 8500:8500 --name emails dockerwip624/emails:v2.0
+```
+
+**Opção B: Usando variáveis de ambiente**
+
+```bash
+docker run -d -p 8500:8500 --name emails \
+  -e AUTH_TOKEN=seu_token_aqui \
+  -e EMAIL_WIPLAY_TOPICO=nome_do_topico_kafka \
+  -e SERVER_IP=10.1.2.224:9092 \
+  -e PORT=8500 \
+  -e LOG_LEVEL=info \
+  dockerwip624/emails:v2.0
+```
+
+**Parâmetros:**
+- `-d`: executa em background.
+- `-p 8500:8500`: mapeia a porta 8500.
+- `--name emails`: nome do container.
+- `-e`: define variáveis de ambiente individuais.
+
+---
+
+### 6. Verificando containers ativos
 
 ```bash
 docker container ls
@@ -128,17 +176,7 @@ docker ps
 
 ---
 
-### 6. Ver Logs do Container
-
-```bash
-docker logs emails
-# ou para seguir os logs em tempo real:
-docker logs -f emails
-```
-
----
-
-### 7. Atualizando o Container
+### 7. Atualizando o container
 
 1. Pare o container atual:
 
@@ -155,20 +193,20 @@ docker container rm emails
 3. Build da nova versão:
 
 ```bash
-docker build -t dockerwip624/emails:v1.41 .
+docker build -t dockerwip624/emails:v2.0 .
 ```
 
 4. Execute o container atualizado:
 
 ```bash
-docker run -d -p 8500:8500 --name emails dockerwip624/emails:v1.41
+docker run -d -p 8500:8500 --name emails dockerwip624/emails:v2.0
 ```
 
 Alternativamente, usando pull no servidor:
 
 ```bash
-docker pull dockerwip624/emails:v1.41
-docker run -d -p 8500:8500 --name emails dockerwip624/emails:v1.41
+docker pull dockerwip624/emails:v2.0
+docker run -d -p 8500:8500 --name emails dockerwip624/emails:v2.0
 ```
 
 ---
@@ -176,10 +214,10 @@ docker run -d -p 8500:8500 --name emails dockerwip624/emails:v1.41
 ### 8. Publicando no Docker Hub
 
 ```bash
-docker push dockerwip624/emails:v1.41
+docker push dockerwip624/emails:v2.0
 ```
 
-Nota: Lembre-se de estar logado no Docker Hub antes do push.
+> Lembre-se de estar logado no Docker Hub antes do push.
 
 ---
 
@@ -193,7 +231,7 @@ docker stop emails
 docker rm emails
 
 # Executar novo container
-docker run -d -p 8500:8500 --name emails dockerwip624/emails:v1.41
+docker run -d -p 8500:8500 --name emails dockerwip624/emails:v2.0
 ```
 
 ---
@@ -212,34 +250,43 @@ A aplicação expõe os seguintes endpoints:
 
 Todos os endpoints requerem autenticação via Bearer Token no header `Authorization`.
 
+### Endpoints de Health Check
+
+- `GET /health` - Status básico da aplicação
+- `GET /health/kafka` - Status detalhado da conexão com Kafka
+
+Os endpoints de health check **não requerem autenticação**.
+
 ---
 
 ## Estrutura do Projeto
 
 ```
 emails/
-├── env/                    # Credenciais (não versionado)
-│   └── credentials.cfg
-├── html_messages/          # Templates HTML de e-mail
-├── routes/
-│   ├── controllers/        # Lógica de negócio
-│   ├── helpers/           # Funções auxiliares
+├── app/                    # Aplicação principal
+│   ├── main.py           # Arquivo principal da aplicação
+│   ├── core/              # Configuração e exceções
+│   │   ├── config.py     # Configurações e variáveis de ambiente
+│   │   └── exceptions.py # Exceções customizadas
 │   ├── models/            # Modelos de dados
-│   ├── security/          # Validação de tokens
-│   └── views/             # Rotas da API
-├── main.py                # Arquivo principal da aplicação
+│   │   ├── email.py      # Modelo de e-mail
+│   │   └── types.py      # Tipos e enums
+│   ├── services/          # Serviços de negócio
+│   │   ├── email_service.py # Serviço de e-mail
+│   │   └── kafka.py       # Serviço Kafka
+│   ├── utils/             # Utilitários
+│   │   └── templates.py   # Handler de templates HTML
+│   ├── middleware/        # Autenticação
+│   │   └── auth.py        # Validação de token
+│   └── api/               # Rotas da API
+│       ├── routes.py      # Rotas de e-mail
+│       └── health.py      # Health checks
+├── html_messages/         # Templates HTML de e-mail
 ├── Dockerfile             # Configuração Docker
 ├── requirements.txt       # Dependências Python
+├── config.cfg             # Configurações (não versionado)
 └── README.md             # Este arquivo
 ```
-
----
-
-## Segurança
-
-- Todas as rotas requerem autenticação via Bearer Token
-- Credenciais devem estar em `env/credentials.cfg` (não versionado)
-- Token configurado via variável `AUTH_TOKEN` no arquivo de credenciais
 
 ---
 
@@ -258,15 +305,16 @@ emails/
 
 - Verifique se o ambiente virtual está ativado
 - Confirme que todas as dependências estão instaladas: `pip install -r requirements.txt`
-- Verifique se o arquivo `env/credentials.cfg` existe e está configurado corretamente
+- Verifique se o arquivo `config.cfg` existe na raiz do projeto e está configurado corretamente
+- Confirme que todas as variáveis obrigatórias estão presentes: `AUTH_TOKEN`, `EMAIL_WIPLAY_TOPICO`, `SERVER_IP`
 
 ### Erro de conexão com Kafka
 
 - Verifique se o serviço Kafka está rodando
-- Confirme as configurações de conexão no código
+- Confirme as configurações de conexão no arquivo `config.cfg`
 
 ### Container não inicia
 
 - Verifique os logs: `docker logs emails`
 - Confirme se a porta 8500 não está em uso: `netstat -an | findstr 8500` (Windows) ou `lsof -i :8500` (Linux/Mac)
-
+- Verifique se as variáveis de ambiente foram passadas corretamente (`-e`) ou se o arquivo `config.cfg` está incluído na imagem
