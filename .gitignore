@@ -191,3 +191,17 @@ logs/
 # FastAPI specific
 .pytest_cache/
 
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
